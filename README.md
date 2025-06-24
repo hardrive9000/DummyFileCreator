@@ -80,6 +80,12 @@ C:\Temp\2.txt<kbd>TAB</kbd>1024<kbd>TAB</kbd>0<kbd>ENTER</kbd>
 C:\Temp\3.txt<kbd>TAB</kbd>2048<kbd>TAB</kbd>1<kbd>ENTER</kbd>  
 C:\Temp\4.txt<kbd>TAB</kbd>1048576<kbd>TAB</kbd>1<kbd>ENTER</kbd>
 
+*DummyFileCreator running on Windows 10 22H2 Visual Studio 2022 17.13.7*  
+![DummyFileCreator](screenshots/screenshot_win.png "DummyFileCreator")  
+
+*DummyFileCreator running on Linux Mint Cinnamon 21.3 VS Code 1.100.8 C# Dev Kit Extension*  
+![DummyFileCreator](screenshots/screenshot_linux.png "DummyFileCreator")  
+
 ## ⚙️ Technical Implementation
 
 ### Architecture Overview
