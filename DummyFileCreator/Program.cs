@@ -83,7 +83,7 @@ namespace DummyFileCreator
                                 Console.WriteLine($"Invalid path/filename: {content[0]} Line {i}");
                         }
                         else
-                            Console.WriteLine($"Invalid line {i}: {line}");
+                            Console.WriteLine($"Invalid line {i + 1}: {line}");
                     }
                     i++;
                 }
