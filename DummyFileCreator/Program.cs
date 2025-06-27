@@ -141,67 +141,51 @@ namespace DummyFileCreator
         private static void CreateDummyFile(string filePath, ulong sizeInBytes, bool random)
         {
             uint totalChunks = (uint)Math.Ceiling((double)sizeInBytes / DEFAULT_CHUNK_SIZE);
-            uint i = 1;
-            byte[] data;
+            uint currentChunk = 0;
 
             Console.Write($"Creating file {filePath} ");
             ConsoleUtility.WriteProgressBar(0);
 
-            using FileStream stream = File.OpenWrite(filePath);
-            using RandomNumberGenerator rng = RandomNumberGenerator.Create();
+            using FileStream stream = new(filePath, FileMode.Create, FileAccess.Write, FileShare.None, (int)DEFAULT_CHUNK_SIZE, FileOptions.SequentialScan);
+            stream.SetLength((long)sizeInBytes);
+            stream.Position = 0;
 
-            if (totalChunks > 1)
+            byte[] buffer = new byte[DEFAULT_CHUNK_SIZE];
+
+            using RandomNumberGenerator? rng = random ? RandomNumberGenerator.Create() : null;
+
+            if (!random)
+                Array.Clear(buffer);
+
+            while (sizeInBytes > 0)
             {
-                data = new byte[DEFAULT_CHUNK_SIZE];
+                int bytesToWrite = (int)Math.Min(sizeInBytes, DEFAULT_CHUNK_SIZE);
 
                 if (random)
                 {
-                    while (sizeInBytes > DEFAULT_CHUNK_SIZE)
+                    if (bytesToWrite == (int)DEFAULT_CHUNK_SIZE)
                     {
-                        rng.GetBytes(data);
-                        stream.Write(data, 0, data.Length);
-                        stream.Flush(true);
-                        sizeInBytes -= DEFAULT_CHUNK_SIZE;
-                        ConsoleUtility.WriteProgressBar(i * 100 / totalChunks, true);
-                        i++;
+                        rng!.GetBytes(buffer);
+                    }
+                    else
+                    {
+                        Span<byte> finalBuffer = buffer.AsSpan(0, bytesToWrite);
+                        rng!.GetBytes(finalBuffer);
                     }
                 }
-                else
+
+                stream.Write(buffer.AsSpan(0, bytesToWrite));
+
+                sizeInBytes -= (ulong)bytesToWrite;
+                currentChunk++;
+
+                if (currentChunk % 10 == 0 || sizeInBytes == 0)
                 {
-                    Span<byte> span = new(data);
-                    span.Clear();
-
-                    while (sizeInBytes > DEFAULT_CHUNK_SIZE)
-                    {
-                        stream.Write(data, 0, data.Length);
-                        stream.Flush(true);
-                        sizeInBytes -= DEFAULT_CHUNK_SIZE;
-                        ConsoleUtility.WriteProgressBar(i * 100 / totalChunks, true);
-                        i++;
-                    }
+                    ConsoleUtility.WriteProgressBar(currentChunk * 100 / totalChunks, true);
                 }
-
-                stream.Seek(0, SeekOrigin.End);
             }
 
-            data = new byte[sizeInBytes];
-
-            if (random)
-            {
-                rng.GetBytes(data);
-                stream.Write(data, 0, data.Length);
-                stream.Flush(true);
-                ConsoleUtility.WriteProgressBar(i * 100 / totalChunks, true);
-            }
-            else
-            {
-                Span<byte> span = new(data);
-                span.Clear();
-                stream.Write(data, 0, data.Length);
-                stream.Flush(true);
-                ConsoleUtility.WriteProgressBar(i * 100 / totalChunks, true);
-            }
-
+            stream.Flush();
             Console.WriteLine();
         }
 
