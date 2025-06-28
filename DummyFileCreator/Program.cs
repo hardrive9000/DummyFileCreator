@@ -51,7 +51,7 @@ namespace DummyFileCreator
             {
                 string? line;
                 string[] content;
-                uint i = 0;
+                uint i = 1;
 
                 using StreamReader sr = new(filePath);
 
@@ -83,7 +83,7 @@ namespace DummyFileCreator
                                 Console.WriteLine($"Invalid path/filename: {content[0]} Line {i}");
                         }
                         else
-                            Console.WriteLine($"Invalid line {i + 1}: {line}");
+                            Console.WriteLine($"Invalid line {i}: {line}");
                     }
                     i++;
                 }
@@ -143,14 +143,16 @@ namespace DummyFileCreator
             uint totalChunks = (uint)Math.Ceiling((double)sizeInBytes / DEFAULT_CHUNK_SIZE);
             uint currentChunk = 0;
 
+            int bytesToWrite;
+
+            byte[] buffer = new byte[DEFAULT_CHUNK_SIZE];
+
             Console.Write($"Creating file {filePath} ");
             ConsoleUtility.WriteProgressBar(0);
 
             using FileStream stream = new(filePath, FileMode.Create, FileAccess.Write, FileShare.None, (int)DEFAULT_CHUNK_SIZE, FileOptions.SequentialScan);
             stream.SetLength((long)sizeInBytes);
             stream.Position = 0;
-
-            byte[] buffer = new byte[DEFAULT_CHUNK_SIZE];
 
             using RandomNumberGenerator? rng = random ? RandomNumberGenerator.Create() : null;
 
@@ -159,7 +161,7 @@ namespace DummyFileCreator
 
             while (sizeInBytes > 0)
             {
-                int bytesToWrite = (int)Math.Min(sizeInBytes, DEFAULT_CHUNK_SIZE);
+                bytesToWrite = (int)Math.Min(sizeInBytes, DEFAULT_CHUNK_SIZE);
 
                 if (random)
                 {
@@ -180,9 +182,7 @@ namespace DummyFileCreator
                 currentChunk++;
 
                 if (currentChunk % 10 == 0 || sizeInBytes == 0)
-                {
                     ConsoleUtility.WriteProgressBar(currentChunk * 100 / totalChunks, true);
-                }
             }
 
             stream.Flush();
